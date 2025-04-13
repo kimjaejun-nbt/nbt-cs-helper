@@ -1,6 +1,6 @@
 from langchain_community.document_loaders import PyMuPDFLoader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import OllamaEmbeddings
+from langchain_community.embeddings import OllamaEmbeddings, OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_community.llms import Ollama
 from langchain.chains import RetrievalQA
@@ -8,11 +8,12 @@ from langchain.prompts import PromptTemplate
 from langchain_core.runnables import RunnablePassthrough
 from langchain_core.output_parsers import StrOutputParser
 import os
+from dotenv import load_dotenv
 
 class PDFQASystem:
     def __init__(self, model_name="llama3.2"):
         self.model_name = model_name
-        self.embeddings = OllamaEmbeddings(model=model_name)
+        self.embeddings = OpenAIEmbeddings()
         self.llm = Ollama(model=model_name)
         self.vector_store = None
         
@@ -53,7 +54,7 @@ class PDFQASystem:
         """QA 체인 설정"""
         prompt_template = """
         You are a assistant at the Daejeon Tourism Organization that provides information about company regulations.
-        Your role is to find and answer the user’s questions based on the context.
+        Your role is to find and answer the user's questions based on the context.
 
         If you cannot find the answer in the documents, you must clearly respond that you do not know.
 
@@ -96,7 +97,7 @@ class PDFQASystem:
 
 def main():
     # QA 시스템 초기화
-    qa_system = PDFQASystem(model_name="dolphin-llama3:8b")  # 또는 다른 Ollama 모델 사용 가능
+    qa_system = PDFQASystem(model_name="gemma3:12b")  # gemma3:12b 모델 좋은 것 같음
     
     # PDF 로드
     pdf_path = "pdf/daejeon.pdf"  # PDF 파일 경로를 지정해주세요
@@ -112,4 +113,5 @@ def main():
         qa_system.answer_question(question)
 
 if __name__ == "__main__":
+    load_dotenv() # langsmith, openai KEY 등 환경변수 설정
     main()
